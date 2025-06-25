@@ -12,6 +12,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Home, ShoppingCart, User, CreditCard, Tag, MessageCircle, Shield, LogOut } from 'lucide-react';
 import Logo from './Logo';
@@ -24,6 +25,7 @@ interface AppSidebarProps {
 const AppSidebar: React.FC<AppSidebarProps> = ({ currentPage, onNavigate }) => {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
+  const { setOpenMobile } = useSidebar();
 
   const menuItems = [
     {
@@ -75,14 +77,19 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ currentPage, onNavigate }) => {
     user && item.roles.includes(user.role)
   );
 
+  const handleNavigation = (page: string) => {
+    onNavigate(page);
+    setOpenMobile(false); // Close mobile sidebar after navigation
+  };
+
   return (
-    <Sidebar className="gradient-blue text-white">
-      <SidebarHeader className="p-4">
+    <Sidebar className="bg-gradient-to-b from-blue-900 to-blue-800 text-white border-r border-blue-700">
+      <SidebarHeader className="p-4 border-b border-blue-700">
         <Logo className="mx-auto" />
         <div className="text-center mt-4">
-          <p className="text-sm text-blue-100">Welcome back,</p>
+          <p className="text-sm text-blue-200">Welcome back,</p>
           <p className="font-semibold text-white">{user?.businessName}</p>
-          <p className="text-xs text-blue-200 capitalize">{user?.role}</p>
+          <p className="text-xs text-blue-300 capitalize">{user?.role}</p>
         </div>
       </SidebarHeader>
       
@@ -93,13 +100,15 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ currentPage, onNavigate }) => {
               {filteredMenuItems.map((item) => (
                 <SidebarMenuItem key={item.page}>
                   <SidebarMenuButton 
-                    onClick={() => onNavigate(item.page)}
-                    className={`w-full text-left hover:bg-white/10 transition-colors ${
-                      currentPage === item.page ? 'bg-white/20 text-white' : 'text-blue-100'
+                    onClick={() => handleNavigation(item.page)}
+                    className={`w-full text-left hover:bg-white/20 transition-colors group relative ${
+                      currentPage === item.page 
+                        ? 'bg-white/25 text-white font-semibold' 
+                        : 'text-white hover:text-white'
                     }`}
                   >
-                    <item.icon className="h-5 w-5" />
-                    <span className="ml-3">{item.title}</span>
+                    <item.icon className="h-5 w-5 text-white" />
+                    <span className="ml-3 text-white font-medium">{item.title}</span>
                     {item.badge && (
                       <span className="ml-auto bg-bgl-yellow-400 text-blue-900 text-xs rounded-full px-2 py-1 font-semibold">
                         {item.badge}
@@ -113,7 +122,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ currentPage, onNavigate }) => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 border-t border-blue-700">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 

@@ -8,12 +8,15 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import AppSidebar from '@/components/AppSidebar';
+import Header from '@/components/Header';
 import Landing from '@/pages/Landing';
 import Login from '@/pages/Login';
 import Dashboard from '@/pages/Dashboard';
 import Products from '@/pages/Products';
 import Account from '@/pages/Account';
-import { Menu } from 'lucide-react';
+import Payments from '@/pages/Payments';
+import Chat from '@/pages/Chat';
+import Offers from '@/pages/Offers';
 
 const queryClient = new QueryClient();
 
@@ -33,32 +36,17 @@ const AppContent = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard onNavigate={setCurrentPage} />;
       case 'products':
         return <Products />;
       case 'account':
         return <Account />;
       case 'payments':
-        return (
-          <div className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Payments</h2>
-            <p className="text-gray-600">Payment management coming soon!</p>
-          </div>
-        );
+        return <Payments />;
       case 'offers':
-        return (
-          <div className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Special Offers</h2>
-            <p className="text-gray-600">Special offers section coming soon!</p>
-          </div>
-        );
+        return <Offers />;
       case 'chat':
-        return (
-          <div className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Chat with Supplier</h2>
-            <p className="text-gray-600">Chat functionality coming soon!</p>
-          </div>
-        );
+        return <Chat />;
       case 'admin':
         return (
           <div className="p-8 text-center">
@@ -67,7 +55,7 @@ const AppContent = () => {
           </div>
         );
       default:
-        return <Dashboard />;
+        return <Dashboard onNavigate={setCurrentPage} />;
     }
   };
 
@@ -79,14 +67,7 @@ const AppContent = () => {
           onNavigate={setCurrentPage} 
         />
         <main className="flex-1 overflow-auto">
-          <header className="bg-white shadow-sm border-b p-4 flex items-center">
-            <SidebarTrigger className="mr-4">
-              <Menu className="h-5 w-5" />
-            </SidebarTrigger>
-            <h1 className="text-xl font-semibold text-gray-900">
-              Big Game Logistics
-            </h1>
-          </header>
+          <Header onNavigate={setCurrentPage} />
           <div className="p-6">
             {renderPage()}
           </div>

@@ -6,7 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, DollarSign, Package, AlertTriangle, TrendingUp } from 'lucide-react';
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onNavigate: (page: string) => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const { user } = useAuth();
   const { totalItems, totalAmount } = useCart();
 
@@ -52,6 +56,37 @@ const Dashboard: React.FC = () => {
     { product: "MEGA ROLLER 10KG", status: "Low Stock", severity: "warning" },
     { product: "MEGA SUGAR BEANS", status: "Out of Stock", severity: "error" },
     { product: "DELTA COOKING OIL", status: "New Arrival", severity: "info" }
+  ];
+
+  const quickActions = [
+    {
+      title: "Browse Products",
+      icon: Package,
+      page: "products",
+      color: "bgl-blue-400",
+      hoverColor: "blue-50"
+    },
+    {
+      title: "Make Payment",
+      icon: DollarSign,
+      page: "payments",
+      color: "green-400",
+      hoverColor: "green-50"
+    },
+    {
+      title: "View Offers",
+      icon: TrendingUp,
+      page: "offers",
+      color: "purple-400",
+      hoverColor: "purple-50"
+    },
+    {
+      title: "Order Now",
+      icon: ShoppingCart,
+      page: "products",
+      color: "orange-400",
+      hoverColor: "orange-50"
+    }
   ];
 
   return (
@@ -155,22 +190,16 @@ const Dashboard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button className="p-4 text-center rounded-lg border-2 border-dashed border-gray-300 hover:border-bgl-blue-400 hover:bg-blue-50 transition-colors">
-              <Package className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-              <p className="text-sm font-medium">Browse Products</p>
-            </button>
-            <button className="p-4 text-center rounded-lg border-2 border-dashed border-gray-300 hover:border-green-400 hover:bg-green-50 transition-colors">
-              <DollarSign className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-              <p className="text-sm font-medium">Make Payment</p>
-            </button>
-            <button className="p-4 text-center rounded-lg border-2 border-dashed border-gray-300 hover:border-purple-400 hover:bg-purple-50 transition-colors">
-              <TrendingUp className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-              <p className="text-sm font-medium">View Offers</p>
-            </button>
-            <button className="p-4 text-center rounded-lg border-2 border-dashed border-gray-300 hover:border-orange-400 hover:bg-orange-50 transition-colors">
-              <ShoppingCart className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-              <p className="text-sm font-medium">Reorder</p>
-            </button>
+            {quickActions.map((action, index) => (
+              <button 
+                key={index}
+                onClick={() => onNavigate(action.page)}
+                className={`p-4 text-center rounded-lg border-2 border-dashed border-gray-300 hover:border-${action.color} hover:bg-${action.hoverColor} transition-colors group`}
+              >
+                <action.icon className="h-8 w-8 mx-auto mb-2 text-gray-400 group-hover:text-gray-600" />
+                <p className="text-sm font-medium">{action.title}</p>
+              </button>
+            ))}
           </div>
         </CardContent>
       </Card>
