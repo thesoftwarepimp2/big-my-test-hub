@@ -191,10 +191,25 @@ const AdminPanel: React.FC = () => {
       </div>
 
       <Tabs defaultValue="orders" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="orders">Orders Management</TabsTrigger>
-          <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="communications">Communications</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg h-auto">
+          <TabsTrigger 
+            value="orders" 
+            className="bg-blue-500 text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md py-3 px-4 text-sm font-medium transition-all"
+          >
+            Orders
+          </TabsTrigger>
+          <TabsTrigger 
+            value="users" 
+            className="bg-green-500 text-white data-[state=active]:bg-green-600 data-[state=active]:text-white rounded-md py-3 px-4 text-sm font-medium transition-all"
+          >
+            Users
+          </TabsTrigger>
+          <TabsTrigger 
+            value="communications" 
+            className="bg-purple-500 text-white data-[state=active]:bg-purple-600 data-[state=active]:text-white rounded-md py-3 px-4 text-sm font-medium transition-all"
+          >
+            Communications
+          </TabsTrigger>
         </TabsList>
 
         {/* Orders Management Tab */}
@@ -212,18 +227,18 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               <div className="space-y-4">
                 {orders.map((order) => (
                   <Card key={order.id} className="border-l-4 border-l-bgl-blue-600">
                     <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
+                        <div className="flex-1">
                           <h3 className="font-semibold text-lg">{order.id}</h3>
                           <p className="text-sm text-gray-600">{order.clientName}</p>
-                          <p className="text-xs text-gray-500">{order.clientEmail}</p>
+                          <p className="text-xs text-gray-500 break-all">{order.clientEmail}</p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left sm:text-right">
                           <p className="text-lg font-bold text-bgl-blue-700">${order.total.toFixed(2)}</p>
                           <p className="text-xs text-gray-500">{order.date}</p>
                         </div>
@@ -231,16 +246,18 @@ const AdminPanel: React.FC = () => {
 
                       <div className="mb-3">
                         <h4 className="text-sm font-medium mb-2">Items:</h4>
-                        {order.items.map((item, index) => (
-                          <div key={index} className="text-sm text-gray-600 flex justify-between">
-                            <span>{item.name} x{item.quantity}</span>
-                            <span>${(item.price * item.quantity).toFixed(2)}</span>
-                          </div>
-                        ))}
+                        <div className="space-y-1">
+                          {order.items.map((item, index) => (
+                            <div key={index} className="text-sm text-gray-600 flex flex-col sm:flex-row sm:justify-between">
+                              <span className="break-words">{item.name} x{item.quantity}</span>
+                              <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
 
-                      <div className="flex justify-between items-center">
-                        <div className="flex space-x-2">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+                        <div className="flex flex-wrap gap-2">
                           <Badge className={getStatusColor(order.status)}>
                             {order.status.toUpperCase()}
                           </Badge>
@@ -248,7 +265,7 @@ const AdminPanel: React.FC = () => {
                             {order.paymentStatus.toUpperCase()}
                           </Badge>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-wrap gap-2">
                           <Button 
                             size="sm" 
                             variant="outline"
@@ -281,23 +298,26 @@ const AdminPanel: React.FC = () => {
             <CardHeader>
               <CardTitle>Registered Users</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               <div className="space-y-4">
                 {registeredUsers.map((user) => (
                   <Card key={user.id} className="border-l-4 border-l-green-500">
                     <CardContent className="p-4">
-                      <div className="flex justify-between items-start">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-3 sm:space-y-0">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{user.businessName}</h3>
-                          <p className="text-sm text-gray-600">{user.email}</p>
-                          <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                          <h3 className="font-semibold text-lg break-words">{user.businessName}</h3>
+                          <p className="text-sm text-gray-600 break-all">{user.email}</p>
+                          <div className="flex flex-wrap gap-2 mt-2 text-sm text-gray-500">
                             <span>Role: {user.role}</span>
+                            <span>•</span>
                             <span>Joined: {user.joinDate}</span>
+                            <span>•</span>
                             <span>Orders: {user.totalOrders}</span>
+                            <span>•</span>
                             <span>Spent: ${user.totalSpent.toFixed(2)}</span>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                           <Badge className={getStatusColor(user.status)}>
                             {user.status.toUpperCase()}
                           </Badge>
@@ -325,16 +345,16 @@ const AdminPanel: React.FC = () => {
             <CardHeader>
               <CardTitle>Start New Conversation</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {registeredUsers.filter(u => u.status === 'active').map((user) => (
                     <Card key={user.id} className="hover:shadow-md transition-shadow cursor-pointer">
                       <CardContent className="p-4">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-medium">{user.businessName}</h4>
-                            <p className="text-sm text-gray-500">{user.email}</p>
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+                          <div className="flex-1">
+                            <h4 className="font-medium break-words">{user.businessName}</h4>
+                            <p className="text-sm text-gray-500 break-all">{user.email}</p>
                             <Badge className="mt-1" variant="outline">
                               {user.role}
                             </Badge>
@@ -342,7 +362,7 @@ const AdminPanel: React.FC = () => {
                           <Button 
                             size="sm"
                             onClick={() => handleStartChat(user.email)}
-                            className="bg-bgl-blue-600 hover:bg-bgl-blue-700 text-white"
+                            className="bg-bgl-blue-600 hover:bg-bgl-blue-700 text-white w-full sm:w-auto"
                           >
                             <Send className="h-4 w-4 mr-1" />
                             Start Chat

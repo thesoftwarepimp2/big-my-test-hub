@@ -49,8 +49,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Card className="h-full flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader>
-        <div className="aspect-square bg-gradient-blue-light rounded-lg flex items-center justify-center mb-4">
-          <Package className="h-16 w-16 text-bgl-blue-600" />
+        <div className="aspect-square bg-white rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+          {product.image ? (
+            <img 
+              src={product.image} 
+              alt={product.name}
+              className="w-full h-full object-contain rounded-lg"
+            />
+          ) : (
+            <Package className="h-16 w-16 text-bgl-blue-600" />
+          )}
         </div>
         <CardTitle className="text-lg font-semibold text-gray-900 leading-tight">
           {product.name}
