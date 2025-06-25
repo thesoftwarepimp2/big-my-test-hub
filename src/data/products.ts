@@ -1,11 +1,22 @@
 import { Product } from '@/types';
 
+export const categories = [
+  'All Products',
+  'flour',
+  'oil', 
+  'rice',
+  'beans',
+  'soap',
+  'canned_fish',
+  'noodles'
+];
+
 export const products: Product[] = [
   {
     id: '1',
     name: 'MEGA ROLLER 10KG',
     category: 'flour',
-    image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop',
     description: 'Premium quality all-purpose flour perfect for baking bread, cakes, and pastries',
     sizes: [
       { size: '2KG', usdPrice: 4.50, zigPrice: 2250 },
@@ -18,7 +29,7 @@ export const products: Product[] = [
     id: '2',
     name: 'MEGA SELF RAISING 5KG',
     category: 'flour',
-    image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1628449840934-58219a99476e?w=400&h=300&fit=crop',
     description: 'Self-raising flour with baking powder already mixed in for convenient baking',
     sizes: [
       { size: '2KG', usdPrice: 5.00, zigPrice: 2500 },
@@ -30,7 +41,7 @@ export const products: Product[] = [
     id: '3',
     name: 'DELTA COOKING OIL 2L',
     category: 'oil',
-    image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=300&fit=crop',
     description: 'Pure sunflower cooking oil ideal for frying, baking, and salad dressing',
     sizes: [
       { size: '750ML', usdPrice: 4.25, zigPrice: 2125 },
@@ -43,7 +54,7 @@ export const products: Product[] = [
     id: '4',
     name: 'CAPRI RICE 10KG',
     category: 'rice',
-    image: 'https://images.unsplash.com/photo-1500673922987-e212871fec22?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop',
     description: 'Premium long grain white rice, perfect for everyday meals',
     sizes: [
       { size: '2KG', usdPrice: 5.50, zigPrice: 2750 },
@@ -56,7 +67,7 @@ export const products: Product[] = [
     id: '5',
     name: 'MEGA SUGAR BEANS 2KG',
     category: 'beans',
-    image: 'https://images.unsplash.com/photo-1517022812141-23620dba5c23?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=400&h=300&fit=crop',
     description: 'High quality sugar beans, rich in protein and perfect for traditional meals',
     sizes: [
       { size: '1KG', usdPrice: 4.75, zigPrice: 2375 },
@@ -68,7 +79,7 @@ export const products: Product[] = [
     id: '6',
     name: 'SAFARI SOAP 800G',
     category: 'soap',
-    image: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1625772299848-391b64cd22db?w=400&h=300&fit=crop',
     description: 'Multi-purpose laundry soap bar for effective cleaning',
     sizes: [
       { size: '400G', usdPrice: 2.25, zigPrice: 1125 },
@@ -80,7 +91,7 @@ export const products: Product[] = [
     id: '7',
     name: 'LUCKY STAR MACKEREL',
     category: 'canned_fish',
-    image: 'https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop',
     description: 'Premium canned mackerel in tomato sauce, ready to eat',
     sizes: [
       { size: '400G', usdPrice: 3.25, zigPrice: 1625 }
