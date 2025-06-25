@@ -43,7 +43,7 @@ const Products: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 md:pb-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -64,82 +64,86 @@ const Products: React.FC = () => {
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent className="w-full sm:max-w-lg">
-            <SheetHeader>
+          <SheetContent className="w-full sm:max-w-lg overflow-hidden flex flex-col">
+            <SheetHeader className="flex-shrink-0">
               <SheetTitle>Shopping Cart ({totalItems} items)</SheetTitle>
             </SheetHeader>
             
-            <div className="mt-6 space-y-4 flex-1 overflow-y-auto">
-              {items.length === 0 ? (
-                <div className="text-center py-8">
-                  <ShoppingCart className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-500">Your cart is empty</p>
-                </div>
-              ) : (
-                <>
-                  {items.map((item) => (
-                    <Card key={`${item.productId}-${item.size}`} className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-sm">{item.productName}</h4>
-                            <p className="text-xs text-gray-500">Size: {item.size}</p>
-                            <p className="text-sm font-medium text-bgl-blue-600">
-                              ${item.unitPrice.toFixed(2)} each
-                            </p>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeItem(item.productId, item.size)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => updateQuantity(item.productId, item.size, item.quantity - 1)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="w-8 text-center font-medium">{item.quantity}</span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => updateQuantity(item.productId, item.size, item.quantity + 1)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                          <p className="font-semibold">${item.totalPrice.toFixed(2)}</p>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                  
-                  <div className="border-t pt-4 space-y-4">
-                    <div className="flex justify-between items-center text-lg font-bold">
-                      <span>Total:</span>
-                      <span>${totalAmount.toFixed(2)}</span>
-                    </div>
-                    
-                    <Button 
-                      onClick={handleSubmitOrder}
-                      className="w-full bg-bgl-blue-600 hover:bg-bgl-blue-700 text-white py-3"
-                    >
-                      Order Now
-                    </Button>
+            <div className="flex-1 overflow-y-auto">
+              <div className="mt-6 space-y-4">
+                {items.length === 0 ? (
+                  <div className="text-center py-8">
+                    <ShoppingCart className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-500">Your cart is empty</p>
                   </div>
-                </>
-              )}
+                ) : (
+                  <>
+                    {items.map((item) => (
+                      <Card key={`${item.productId}-${item.size}`} className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-sm">{item.productName}</h4>
+                              <p className="text-xs text-gray-500">Size: {item.size}</p>
+                              <p className="text-sm font-medium text-bgl-blue-600">
+                                ${item.unitPrice.toFixed(2)} each
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeItem(item.productId, item.size)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => updateQuantity(item.productId, item.size, item.quantity - 1)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="w-8 text-center font-medium">{item.quantity}</span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => updateQuantity(item.productId, item.size, item.quantity + 1)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <p className="font-semibold">${item.totalPrice.toFixed(2)}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </>
+                )}
+              </div>
             </div>
+            
+            {items.length > 0 && (
+              <div className="flex-shrink-0 border-t pt-4 space-y-4 mt-4">
+                <div className="flex justify-between items-center text-lg font-bold">
+                  <span>Total:</span>
+                  <span>${totalAmount.toFixed(2)}</span>
+                </div>
+                
+                <Button 
+                  onClick={handleSubmitOrder}
+                  className="w-full bg-bgl-blue-600 hover:bg-bgl-blue-700 text-white py-3"
+                >
+                  Order Now
+                </Button>
+              </div>
+            )}
           </SheetContent>
         </Sheet>
       </div>

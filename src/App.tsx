@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import AppSidebar from '@/components/AppSidebar';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import Landing from '@/pages/Landing';
 import Login from '@/pages/Login';
 import Dashboard from '@/pages/Dashboard';
@@ -17,13 +18,24 @@ import Account from '@/pages/Account';
 import Payments from '@/pages/Payments';
 import Chat from '@/pages/Chat';
 import Offers from '@/pages/Offers';
+import AdminPanel from '@/pages/AdminPanel';
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [currentView, setCurrentView] = useState<'landing' | 'login'>('landing');
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [currentPage, setCurrentPage] = useState(() => {
+    // Start admin users on admin panel instead of dashboard
+    return user?.role === 'admin' ? 'admin' : 'dashboard';
+  });
+
+  // Update currentPage when user changes (e.g., after login)
+  React.useEffect(() => {
+    if (user?.role === 'admin' && currentPage === 'dashboard') {
+      setCurrentPage('admin');
+    }
+  }, [user?.role, currentPage]);
 
   if (!isAuthenticated) {
     if (currentView === 'landing') {
@@ -48,14 +60,9 @@ const AppContent = () => {
       case 'chat':
         return <Chat />;
       case 'admin':
-        return (
-          <div className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Admin Panel</h2>
-            <p className="text-gray-600">Admin panel coming soon!</p>
-          </div>
-        );
+        return <AdminPanel />;
       default:
-        return <Dashboard onNavigate={setCurrentPage} />;
+        return user?.role === 'admin' ? <AdminPanel /> : <Dashboard onNavigate={setCurrentPage} />;
     }
   };
 
@@ -71,6 +78,7 @@ const AppContent = () => {
           <div className="p-6">
             {renderPage()}
           </div>
+          <Footer currentPage={currentPage} onNavigate={setCurrentPage} />
         </main>
       </div>
     </SidebarProvider>

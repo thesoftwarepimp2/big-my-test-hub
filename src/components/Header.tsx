@@ -20,7 +20,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
   const { user, logout } = useAuth();
 
   return (
-    <header className="bg-white shadow-sm border-b p-4 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-white shadow-sm border-b p-4 flex items-center justify-between">
       <div className="flex items-center">
         <SidebarTrigger className="mr-4 md:hidden">
           <Menu className="h-5 w-5" />
@@ -47,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-white border shadow-lg">
+          <DropdownMenuContent align="end" className="w-56 bg-white border shadow-lg z-50">
             <DropdownMenuItem 
               onClick={() => onNavigate('account')}
               className="cursor-pointer hover:bg-gray-50"

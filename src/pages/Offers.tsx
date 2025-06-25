@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,12 +13,12 @@ const Offers: React.FC = () => {
     {
       id: 'offer-1',
       productId: '1',
-      productName: 'MEGA ROLLER 10KG',
+      productName: 'MEGA ROLLER FLOUR 10KG',
       originalPrice: 18.50,
       discountPrice: 15.99,
       discountPercent: 14,
       expiryDate: '2024-02-15',
-      image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=300&fit=crop',
+      image: '/lovable-uploads/50ac899e-bf20-4786-be08-712026aa8f35.png',
       description: 'Premium quality flour perfect for baking',
       stockLevel: 'Limited Stock',
       category: 'Flour'
@@ -27,15 +26,15 @@ const Offers: React.FC = () => {
     {
       id: 'offer-2',
       productId: '3',
-      productName: 'DELTA COOKING OIL 2L',
-      originalPrice: 12.50,
-      discountPrice: 9.99,
-      discountPercent: 20,
+      productName: 'BUTTERCUP MARGARINE',
+      originalPrice: 6.50,
+      discountPrice: 4.99,
+      discountPercent: 23,
       expiryDate: '2024-02-10',
-      image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=300&fit=crop',
-      description: 'Pure cooking oil for all your cooking needs',
+      image: '/lovable-uploads/b7f3f2f0-e928-4629-9632-8db9b173d025.png',
+      description: 'Premium margarine for baking and cooking',
       stockLevel: 'In Stock',
-      category: 'Cooking Oil'
+      category: 'Margarine'
     },
     {
       id: 'offer-3',
@@ -45,49 +44,49 @@ const Offers: React.FC = () => {
       discountPrice: 6.99,
       discountPercent: 20,
       expiryDate: '2024-02-20',
-      image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=400&h=300&fit=crop',
+      image: '/lovable-uploads/ef78ce99-0223-4377-ad39-2352f61a281e.png',
       description: 'High quality sugar beans rich in protein',
       stockLevel: 'In Stock',
       category: 'Beans'
     },
     {
       id: 'offer-4',
-      productId: '7',
-      productName: 'LUCKY STAR MACKEREL',
-      originalPrice: 3.25,
-      discountPrice: 2.49,
-      discountPercent: 23,
+      productId: '4',
+      productName: 'CHIMOMBE FULL CREAM MILK 1L',
+      originalPrice: 4.25,
+      discountPrice: 3.49,
+      discountPercent: 18,
       expiryDate: '2024-02-12',
-      image: 'https://images.unsplash.com/photo-1500673922987-e212871fec22?w=400&h=300&fit=crop',
-      description: 'Fresh canned mackerel in tomato sauce',
+      image: '/lovable-uploads/7fff88c9-3af3-45fc-be84-9c9e87de1377.png',
+      description: 'Fresh full cream milk, long life',
       stockLevel: 'In Stock',
-      category: 'Canned Fish'
+      category: 'Milk'
     },
     {
       id: 'offer-5',
-      productId: '9',
-      productName: 'CAPRI RICE 10KG',
-      originalPrice: 22.00,
-      discountPrice: 18.99,
-      discountPercent: 14,
+      productId: '7',
+      productName: 'POTATOES 10KG',
+      originalPrice: 6.75,
+      discountPrice: 5.99,
+      discountPercent: 11,
       expiryDate: '2024-02-25',
-      image: 'https://images.unsplash.com/photo-1517022812141-23620dba5c23?w=400&h=300&fit=crop',
-      description: 'Premium long grain rice',
+      image: '/lovable-uploads/be0e8735-437a-426c-9cc1-fecba4b739d4.png',
+      description: 'Fresh potatoes, perfect for cooking',
       stockLevel: 'Limited Stock',
-      category: 'Rice'
+      category: 'Potatoes'
     },
     {
       id: 'offer-6',
-      productId: '11',
-      productName: 'MEGA NOODLES 500G',
-      originalPrice: 4.50,
-      discountPrice: 3.25,
-      discountPercent: 28,
+      productId: '6',
+      productName: 'KOO BAKED BEANS 410G',
+      originalPrice: 2.85,
+      discountPrice: 2.25,
+      discountPercent: 21,
       expiryDate: '2024-02-08',
-      image: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=400&h=300&fit=crop',
-      description: 'Instant noodles - chicken flavor',
+      image: '/lovable-uploads/dae9e62f-8fa7-4997-8a0b-84c8c7f202be.png',
+      description: 'Baked beans in tomato sauce',
       stockLevel: 'In Stock',
-      category: 'Noodles'
+      category: 'Beans'
     }
   ];
 
@@ -143,7 +142,7 @@ const Offers: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 md:pb-6">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Special Offers</h1>
@@ -178,7 +177,7 @@ const Offers: React.FC = () => {
                 <img
                   src={offer.image}
                   alt={offer.productName}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-contain bg-gray-50"
                 />
                 <div className="absolute top-2 left-2">
                   <Badge className="bg-red-500 text-white">
