@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import Logo from '@/components/Logo';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import { authenticate } from '@/data/users';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -28,24 +27,15 @@ const Login: React.FC<LoginProps> = ({ onBack }) => {
     setIsLoading(true);
 
     try {
-      const user = authenticate(username, password, selectedRole);
-      if (user) {
-        login(user);
-        toast({
-          title: "Login successful!",
-          description: `Welcome back, ${user.businessName}`
-        });
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid credentials. Please check your username and password.",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
+      await login({ username, password, role: selectedRole });
       toast({
-        title: "Login error",
-        description: "An error occurred during login. Please try again.",
+        title: "Login successful!",
+        description: "Welcome back to Big Game Logistics"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.response?.data?.message || "Invalid credentials. Please check your username and password.",
         variant: "destructive"
       });
     } finally {
@@ -172,7 +162,7 @@ const Login: React.FC<LoginProps> = ({ onBack }) => {
                 className="w-full bg-bgl-yellow-400 hover:bg-bgl-yellow-500 text-gray-900 font-bold py-3 text-lg rounded-full mt-6"
                 disabled={isLoading}
               >
-                {isLoading ? 'Logging in...' : 'LOGIN'}
+                {isLoading ? 'Connecting to WordPress...' : 'LOGIN'}
               </Button>
             </form>
 
@@ -214,11 +204,12 @@ const Login: React.FC<LoginProps> = ({ onBack }) => {
 
         {/* Demo Credentials Info */}
         <div className="mt-6 p-4 bg-white/10 rounded-lg text-white text-sm">
-          <p className="font-semibold mb-2">Demo Credentials:</p>
+          <p className="font-semibold mb-2">WordPress Integration Active:</p>
           <div className="space-y-1 text-xs">
-            <p>• Wholesaler: wholesaler_demo / biggame123</p>
-            <p>• Retailer: retailer_demo / biggame123</p>
-            <p>• Admin: admin_demo / biggame123</p>
+            <p>• Backend: school.nhaka.online/connect/</p>
+            <p>• API: WordPress REST API + Custom BGL endpoints</p>
+            <p>• Authentication: JWT tokens</p>
+            <p>• Use your WordPress user credentials to login</p>
           </div>
         </div>
       </div>
