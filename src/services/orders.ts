@@ -31,34 +31,20 @@ export const ordersService = {
   },
 
   async getOrders(): Promise<Order[]> {
-    const response = await api.get('/wp/v2/orders?_embed&per_page=100');
-    return response.data.map((wpOrder: any) => ({
-      id: `ORD-${wpOrder.id.toString().padStart(3, '0')}`,
-      clientName: wpOrder.acf.client_name,
-      clientEmail: wpOrder.acf.client_email,
-      items: wpOrder.acf.order_items || [],
-      total: wpOrder.acf.order_total,
-      status: wpOrder.acf.order_status,
-      date: wpOrder.acf.order_date,
-      paymentStatus: wpOrder.acf.payment_status
-    }));
+    try {
+      const response = await bglApi.get('/orders');
+      return response.data || [];
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      return [];
+    }
   },
 
   async updateOrderStatus(orderId: string, status: 'pending' | 'processing' | 'delivered'): Promise<void> {
-    const id = orderId.replace('ORD-', '');
-    await api.post(`/wp/v2/orders/${id}`, {
-      acf: {
-        order_status: status
-      }
-    });
+    await bglApi.put(`/orders/${orderId}/status`, { status });
   },
 
   async updatePaymentStatus(orderId: string, paymentStatus: 'paid' | 'unpaid'): Promise<void> {
-    const id = orderId.replace('ORD-', '');
-    await api.post(`/wp/v2/orders/${id}`, {
-      acf: {
-        payment_status: paymentStatus
-      }
-    });
+    await bglApi.put(`/orders/${orderId}/payment`, { paymentStatus });
   }
 };

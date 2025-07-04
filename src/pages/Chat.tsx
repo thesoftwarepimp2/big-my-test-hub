@@ -1,10 +1,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMessages, useSendMessage, useFileUpload, useConversations } from '@/hooks/useChat';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { 
   MessageCircle, 
@@ -13,58 +13,26 @@ import {
   Phone, 
   Video,
   MoreVertical,
-  Clock
+  Clock,
+  Check,
+  CheckCheck,
+  Image as ImageIcon,
+  FileText,
+  Download
 } from 'lucide-react';
 
 const Chat: React.FC = () => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: 'Big Game Logistics',
-      content: 'Hello! Welcome to Big Game Logistics support. How can we help you today?',
-      timestamp: '10:30 AM',
-      isSupplier: true,
-      status: 'delivered'
-    },
-    {
-      id: 2,
-      sender: user?.businessName || 'You',
-      content: 'Hi, I wanted to check on my recent order status.',
-      timestamp: '10:32 AM',
-      isSupplier: false,
-      status: 'delivered'
-    },
-    {
-      id: 3,
-      sender: 'Big Game Logistics',
-      content: 'Sure! Let me check that for you. Can you provide your order number?',
-      timestamp: '10:33 AM',
-      isSupplier: true,
-      status: 'delivered'
-    },
-    {
-      id: 4,
-      sender: user?.businessName || 'You',
-      content: 'Order #BGL-001',
-      timestamp: '10:34 AM',
-      isSupplier: false,
-      status: 'delivered'
-    },
-    {
-      id: 5,
-      sender: 'Big Game Logistics',
-      content: 'Great! Your order BGL-001 is currently being processed and will be shipped tomorrow. You should receive it by Friday.',
-      timestamp: '10:35 AM',
-      isSupplier: true,
-      status: 'delivered'
-    }
-  ]);
-  
+  const [selectedConversation, setSelectedConversation] = useState<string>('admin-support');
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: conversations = [] } = useConversations();
+  const { data: messages = [] } = useMessages(selectedConversation);
+  const sendMessageMutation = useSendMessage();
+  const fileUploadMutation = useFileUpload();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -74,35 +42,18 @@ const Chat: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      const message = {
-        id: messages.length + 1,
-        sender: user?.businessName || 'You',
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return;
+
+    try {
+      await sendMessageMutation.mutateAsync({
+        conversationId: selectedConversation,
         content: newMessage,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isSupplier: false,
-        status: 'sent'
-      };
-      
-      setMessages([...messages, message]);
+        type: 'text'
+      });
       setNewMessage('');
-      
-      // Simulate supplier typing
-      setIsTyping(true);
-      setTimeout(() => {
-        setIsTyping(false);
-        // Simulate auto-response
-        const autoResponse = {
-          id: messages.length + 2,
-          sender: 'Big Game Logistics',
-          content: 'Thank you for your message. Our team will get back to you shortly.',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          isSupplier: true,
-          status: 'delivered'
-        };
-        setMessages(prev => [...prev, autoResponse]);
-      }, 2000);
+    } catch (error) {
+      console.error('Failed to send message:', error);
     }
   };
 
@@ -113,8 +64,103 @@ const Chat: React.FC = () => {
     }
   };
 
-  const handleFileAttach = () => {
-    fileInputRef.current?.click();
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select a file smaller than 10MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const uploadResult = await fileUploadMutation.mutateAsync(file);
+      
+      const fileType = file.type.startsWith('image/') ? 'image' : 'file';
+      const formData = new FormData();
+      formData.append('file', file);
+
+      await sendMessageMutation.mutateAsync({
+        conversationId: selectedConversation,
+        content: uploadResult.fileName,
+        type: fileType,
+        fileData: formData
+      });
+    } catch (error) {
+      console.error('Failed to upload and send file:', error);
+    }
+  };
+
+  const renderMessage = (message: any) => {
+    const isOwn = message.senderId === user?.id;
+    
+    return (
+      <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
+        <div className={`max-w-xs lg:max-w-md ${isOwn ? 'order-2' : 'order-1'}`}>
+          <div
+            className={`rounded-lg px-4 py-2 ${
+              isOwn
+                ? 'bg-bgl-blue-600 text-white'
+                : 'bg-gray-100 text-gray-900'
+            }`}
+          >
+            {message.type === 'text' && (
+              <p className="text-sm">{message.content}</p>
+            )}
+            
+            {message.type === 'image' && (
+              <div>
+                <img 
+                  src={message.fileUrl} 
+                  alt={message.fileName}
+                  className="max-w-full h-auto rounded mb-2"
+                />
+                <p className="text-xs">{message.fileName}</p>
+              </div>
+            )}
+            
+            {message.type === 'file' && (
+              <div className="flex items-center space-x-2">
+                <FileText className="h-4 w-4" />
+                <span className="text-sm">{message.fileName}</span>
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                  <Download className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+          </div>
+          
+          <div className={`flex items-center mt-1 space-x-1 ${
+            isOwn ? 'justify-end' : 'justify-start'
+          }`}>
+            <span className="text-xs text-gray-500">
+              {new Date(message.timestamp).toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              })}
+            </span>
+            {isOwn && (
+              <div className="flex">
+                {message.status === 'sent' && <Clock className="h-3 w-3 text-gray-400" />}
+                {message.status === 'delivered' && <Check className="h-3 w-3 text-blue-500" />}
+                {message.status === 'read' && <CheckCheck className="h-3 w-3 text-blue-500" />}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {!isOwn && (
+          <div className="w-8 h-8 bg-bgl-blue-600 rounded-full flex items-center justify-center order-1 mr-2">
+            <MessageCircle className="h-4 w-4 text-white" />
+          </div>
+        )}
+      </div>
+    );
   };
 
   const quickReplies = [
@@ -160,49 +206,11 @@ const Chat: React.FC = () => {
 
       {/* Messages Area */}
       <Card className="flex-1 flex flex-col mt-4">
-        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.isSupplier ? 'justify-start' : 'justify-end'}`}
-            >
-              <div className={`max-w-xs lg:max-w-md ${message.isSupplier ? 'order-2' : 'order-1'}`}>
-                <div
-                  className={`rounded-lg px-4 py-2 ${
-                    message.isSupplier
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'bg-bgl-blue-600 text-white'
-                  }`}
-                >
-                  <p className="text-sm">{message.content}</p>
-                </div>
-                <div className={`flex items-center mt-1 space-x-1 ${
-                  message.isSupplier ? 'justify-start' : 'justify-end'
-                }`}>
-                  <span className="text-xs text-gray-500">{message.timestamp}</span>
-                  {!message.isSupplier && (
-                    <div className="flex">
-                      {message.status === 'sent' && <Clock className="h-3 w-3 text-gray-400" />}
-                      {message.status === 'delivered' && (
-                        <div className="flex">
-                          <div className="w-3 h-3 text-blue-500">✓</div>
-                          <div className="w-3 h-3 text-blue-500 -ml-1">✓</div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-              {message.isSupplier && (
-                <div className="w-8 h-8 bg-bgl-blue-600 rounded-full flex items-center justify-center order-1 mr-2">
-                  <MessageCircle className="h-4 w-4 text-white" />
-                </div>
-              )}
-            </div>
-          ))}
+        <CardContent className="flex-1 overflow-y-auto p-4">
+          {messages.map(renderMessage)}
           
           {isTyping && (
-            <div className="flex justify-start">
+            <div className="flex justify-start mb-4">
               <div className="w-8 h-8 bg-bgl-blue-600 rounded-full flex items-center justify-center mr-2">
                 <MessageCircle className="h-4 w-4 text-white" />
               </div>
@@ -241,7 +249,7 @@ const Chat: React.FC = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleFileAttach}
+              onClick={() => fileInputRef.current?.click()}
               className="text-gray-500"
             >
               <Paperclip className="h-5 w-5" />
@@ -255,7 +263,7 @@ const Chat: React.FC = () => {
             />
             <Button
               onClick={handleSendMessage}
-              disabled={!newMessage.trim()}
+              disabled={!newMessage.trim() || sendMessageMutation.isPending}
               className="bg-bgl-blue-600 hover:bg-bgl-blue-700"
             >
               <Send className="h-4 w-4" />
@@ -263,12 +271,9 @@ const Chat: React.FC = () => {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*,.pdf,.doc,.docx"
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
               className="hidden"
-              onChange={(e) => {
-                // Handle file upload
-                console.log('File selected:', e.target.files?.[0]);
-              }}
+              onChange={handleFileSelect}
             />
           </div>
         </div>

@@ -12,7 +12,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { toast } from '@/hooks/use-toast';
 
 const Products: React.FC = () => {
-  const { items, updateQuantity, removeItem, totalItems, totalAmount, clearCart } = useCart();
+  const { items, updateQuantity, removeItem, totalItems, totalAmount, submitOrder, isLoading: cartLoading } = useCart();
   const { data: products = [], isLoading, error } = useWordPressProducts();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Products');
@@ -27,24 +27,6 @@ const Products: React.FC = () => {
     
     return matchesSearch && matchesCategory;
   });
-
-  const handleSubmitOrder = () => {
-    if (items.length === 0) {
-      toast({
-        title: "Cart is empty",
-        description: "Please add some products to your cart before ordering.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Order submitted successfully!",
-      description: `Your order of ${totalItems} items worth $${totalAmount.toFixed(2)} has been submitted.`
-    });
-
-    clearCart();
-  };
 
   if (isLoading) {
     return (
@@ -170,10 +152,11 @@ const Products: React.FC = () => {
                 </div>
                 
                 <Button 
-                  onClick={handleSubmitOrder}
+                  onClick={submitOrder}
+                  disabled={cartLoading}
                   className="w-full bg-bgl-blue-600 hover:bg-bgl-blue-700 text-white py-3"
                 >
-                  Order Now
+                  {cartLoading ? 'Submitting...' : 'Submit Order'}
                 </Button>
               </div>
             )}

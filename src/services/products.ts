@@ -58,19 +58,22 @@ const transformWooCommerceProduct = (wcProduct: WooCommerceProduct): Product => 
   };
 };
 
+const CONSUMER_KEY = import.meta.env.VITE_WOOCOMMERCE_CONSUMER_KEY;
+const CONSUMER_SECRET = import.meta.env.VITE_WOOCOMMERCE_CONSUMER_SECRET;
+
 export const productsService = {
   async getProducts(): Promise<Product[]> {
-    const response = await api.get('/wc/v3/products?per_page=100&consumer_key=your_key&consumer_secret=your_secret');
+    const response = await api.get(`/wc/v3/products?per_page=100&consumer_key=${CONSUMER_KEY}&consumer_secret=${CONSUMER_SECRET}`);
     return response.data.map(transformWooCommerceProduct);
   },
 
   async getProduct(id: string): Promise<Product> {
-    const response = await api.get(`/wc/v3/products/${id}?consumer_key=your_key&consumer_secret=your_secret`);
+    const response = await api.get(`/wc/v3/products/${id}?consumer_key=${CONSUMER_KEY}&consumer_secret=${CONSUMER_SECRET}`);
     return transformWooCommerceProduct(response.data);
   },
 
   async getProductsByCategory(category: string): Promise<Product[]> {
-    const response = await api.get(`/wc/v3/products?category=${category}&per_page=100&consumer_key=your_key&consumer_secret=your_secret`);
+    const response = await api.get(`/wc/v3/products?category=${category}&per_page=100&consumer_key=${CONSUMER_KEY}&consumer_secret=${CONSUMER_SECRET}`);
     return response.data.map(transformWooCommerceProduct);
   }
 };

@@ -1,0 +1,29 @@
+
+post_type,post_title,post_content,post_excerpt,post_status,categories,tags,product_price,product_regular_price,product_stock_status,product_images,size_2kg_usd,size_2kg_zig,size_5kg_usd,size_5kg_zig,size_10kg_usd,size_10kg_zig,size_20kg_usd,size_20kg_zig
+product,"MEGA ROLLER FLOUR 10KG","Premium quality flour perfect for baking and cooking. Made from finest wheat grains.","High-quality flour for all your baking needs","publish","flour","baking,cooking,wheat","18.50","18.50","instock","/lovable-uploads/50ac899e-bf20-4786-be08-712026aa8f35.png","","","","","18.50","9250","","" 
+product,"CHIMOMBE FULL CREAM MILK 1L","Fresh full cream milk with rich taste and high nutritional value.","Premium full cream milk","publish","dairy","milk,fresh,dairy","4.25","4.25","instock","/lovable-uploads/7fff88c9-3af3-45fc-be84-9c9e87de1377.png","","","","","","","",""
+product,"BUTTERCUP MARGARINE","Premium margarine for cooking and baking purposes.","High-quality margarine","publish","dairy","margarine,cooking,baking","6.50","6.50","instock","/lovable-uploads/6b48b696-f25e-4f4d-83fb-416e5751eb90.png","","","","","","","",""
+product,"KOO BAKED BEANS 410G","Delicious baked beans in rich tomato sauce, ready to eat.","Tasty baked beans in tomato sauce","publish","beans","beans,canned,ready-to-eat","2.85","2.85","instock","/lovable-uploads/87a386fc-72ae-45da-bce8-173bc5498a72.png","","","","","","","",""
+product,"POTATOES 10KG","Fresh potatoes perfect for cooking, frying, and baking.","Fresh quality potatoes","publish","vegetables","potatoes,fresh,vegetables","6.75","6.75","instock","/lovable-uploads/2ed906fe-a9f4-46ed-a5cb-0e7a98fb0654.png","","","","","6.75","3375","","" 
+product,"CANOLA COOKING OIL 2L","Pure canola oil ideal for healthy cooking and frying.","Healthy canola cooking oil","publish","oil","oil,cooking,canola","8.90","8.90","instock","/lovable-uploads/012ea675-7eaa-4ff1-a9e7-b57d4ef0a5e3.png","","","","","","","",""
+product,"LONG GRAIN RICE 5KG","Premium long grain rice with excellent texture and taste.","High-quality long grain rice","publish","rice","rice,grain,cooking","12.75","12.75","instock","/lovable-uploads/36576d91-5be2-451a-8fbb-287796a51139.png","","","12.75","6375","","","",""
+product,"SUNLIGHT DISHWASHING LIQUID","Effective dishwashing liquid that cuts through grease easily.","Powerful dishwashing liquid","publish","soap","soap,dishwashing,cleaning","3.40","3.40","instock","/lovable-uploads/9fef6675-5097-40ac-9110-e5b7968e0f84.png","","","","","","","",""
+product,"OMO WASHING POWDER 2KG","Powerful washing powder for all your laundry needs.","Effective washing powder","publish","soap","soap,laundry,powder","15.25","15.25","instock","/lovable-uploads/7ba6c1bf-d328-4983-898a-4299ab38d252.png","15.25","7625","","","","","",""
+product,"GLORIA FLOUR 10KG","High-quality flour perfect for bread making and general baking.","Premium baking flour","publish","flour","flour,baking,bread","17.80","17.80","instock","/lovable-uploads/be0e8735-437a-426c-9cc1-fecba4b739d4.png","","","","","17.80","8900","","" 
+product,"SUNFOIL COOKING OIL 2L","Pure sunflower oil for healthy cooking and food preparation.","Pure sunflower cooking oil","publish","oil","oil,sunflower,cooking","9.15","9.15","instock","/lovable-uploads/c1baf6b1-44a5-4624-8f19-9c8c16186d1c.png","","","","","","","",""
+product,"BASMATI RICE 2KG","Aromatic basmati rice with long grains and distinctive flavor.","Premium basmati rice","publish","rice","rice,basmati,aromatic","8.50","8.50","instock","/lovable-uploads/d6d51239-dfcb-456c-a486-332108a7d290.png","8.50","4250","","","","","",""
+product,"WHITE BREAD FLOUR 5KG","Specially milled white flour ideal for bread making.","Premium bread flour","publish","flour","flour,bread,white","14.20","14.20","instock","/lovable-uploads/a482987a-a345-4e6b-9eab-cb6d18176549.png","","","14.20","7100","","","",""
+product,"JASMINE RICE 10KG","Fragrant jasmine rice with soft texture and delicate aroma.","Premium jasmine rice","publish","rice","rice,jasmine,fragrant","22.50","22.50","instock","/lovable-uploads/ef78ce99-0223-4377-ad39-2352f61a281e.png","","","","","22.50","11250","","" 
+product,"REFINED COOKING OIL 5L","Multi-purpose refined oil suitable for all cooking methods.","Versatile refined cooking oil","publish","oil","oil,refined,multipurpose","18.75","18.75","instock","/lovable-uploads/a4dfe34d-1fae-463d-82e5-87da4744df85.png","","","","","","","",""
+product,"HANDY ANDY CLEANER","All-purpose cleaner for household cleaning tasks.","Effective all-purpose cleaner","publish","soap","cleaner,household,multipurpose","4.60","4.60","instock","/lovable-uploads/b7f3f2f0-e928-4629-9632-8db9b173d025.png","","","","","","","",""
+product,"BROWN BREAD FLOUR 2KG","Wholesome brown flour for healthy bread and baking.","Healthy brown bread flour","publish","flour","flour,brown,healthy","11.90","11.90","instock","/lovable-uploads/dae9e62f-8fa7-4997-8a0b-84c8c7f202be.png","11.90","5950","","","","","",""
+
+user_login,user_email,user_pass,role,business_name,phone,bgl_role
+wholesaler1,wholesale@test.com,password123,subscriber,"ABC Wholesale Ltd","+263123456789",wholesaler
+retailer1,retail@test.com,password123,subscriber,"XYZ Retail Store","+263987654321",retailer  
+bgl_admin,admin@bgl.com,admin123,administrator,"Big Game Logistics","+263555000111",admin
+
+order_id,client_name,client_email,order_items,order_total,order_status,payment_status,order_date
+ORD-001,"ABC Wholesale Ltd","wholesale@test.com","MEGA ROLLER FLOUR 10KG x5, BUTTERCUP MARGARINE x10","157.50","pending","unpaid","2024-01-15"
+ORD-002,"XYZ Retail Store","retail@test.com","POTATOES 10KG x20, KOO BAKED BEANS 410G x50","277.50","processing","paid","2024-01-14"
+ORD-003,"ABC Wholesale Ltd","wholesale@test.com","CHIMOMBE FULL CREAM MILK 1L x100","425.00","delivered","paid","2024-01-13"
