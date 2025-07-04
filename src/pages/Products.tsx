@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { useWordPressProducts } from '@/hooks/useWordPress';
@@ -6,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Search, Filter, Minus, Plus, Trash2 } from 'lucide-react';
+import { ShoppingCart, Search, Filter, Minus, Plus, Trash2, Package } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { toast } from '@/hooks/use-toast';
 
