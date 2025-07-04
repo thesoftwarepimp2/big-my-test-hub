@@ -5,53 +5,50 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { chatService, ChatMessage, ChatConversation } from '@/services/chat';
 import { Send, Paperclip, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-
-interface ChatMessage {
-  id: string;
-  senderId: string;
-  senderName: string;
-  content: string;
-  timestamp: string;
-  type: 'text' | 'file';
-}
 
 interface ChatDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  recipientEmail: string;
+  recipientId: string;
   recipientName: string;
 }
 
-const ChatDialog: React.FC<ChatDialogProps> = ({ isOpen, onClose, recipientEmail, recipientName }) => {
+const ChatDialog: React.FC<ChatDialogProps> = ({ isOpen, onClose, recipientId, recipientName }) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [conversation, setConversation] = useState<ChatConversation | null>(null);
+  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load chat history from localStorage
+  const conversationId = user ? `${user.id}_${recipientId}` : '';
+
   useEffect(() => {
-    if (isOpen && user) {
-      const chatKey = `chat_${user.id}_${recipientEmail}`;
-      const storedMessages = localStorage.getItem(chatKey);
-      if (storedMessages) {
-        setMessages(JSON.parse(storedMessages));
-      } else {
-        // Initialize with a welcome message
-        const welcomeMessage: ChatMessage = {
-          id: '1',
-          senderId: 'system',
-          senderName: 'System',
-          content: `Chat started with ${recipientName}`,
-          timestamp: new Date().toISOString(),
-          type: 'text'
-        };
-        setMessages([welcomeMessage]);
-      }
+    if (isOpen && user && recipientId) {
+      loadConversation();
     }
-  }, [isOpen, user, recipientEmail, recipientName]);
+  }, [isOpen, user, recipientId]);
+
+  const loadConversation = async () => {
+    setLoading(true);
+    try {
+      // Create or get conversation
+      const conv = await chatService.createConversation(recipientId, recipientName);
+      setConversation(conv);
+      
+      // Load messages
+      const msgs = await chatService.getMessages(conversationId);
+      setMessages(msgs);
+    } catch (error) {
+      console.error('Failed to load conversation:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -61,55 +58,29 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ isOpen, onClose, recipientEmail
     scrollToBottom();
   }, [messages]);
 
-  const saveMessages = (updatedMessages: ChatMessage[]) => {
-    if (user) {
-      const chatKey = `chat_${user.id}_${recipientEmail}`;
-      localStorage.setItem(chatKey, JSON.stringify(updatedMessages));
-    }
-  };
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !user || !conversationId) return;
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !user) return;
-
-    const message: ChatMessage = {
-      id: Date.now().toString(),
-      senderId: user.id,
-      senderName: user.username,
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-      type: 'text'
-    };
-
-    const updatedMessages = [...messages, message];
-    setMessages(updatedMessages);
-    saveMessages(updatedMessages);
-    setNewMessage('');
-
-    toast({
-      title: "Message sent",
-      description: `Message sent to ${recipientName}`,
-    });
-
-    // Simulate a reply after 2 seconds (for demo)
-    setTimeout(() => {
-      const reply: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        senderId: recipientEmail,
-        senderName: recipientName,
-        content: "Thank you for your message. I'll get back to you soon!",
-        timestamp: new Date().toISOString(),
-        type: 'text'
-      };
-
-      const finalMessages = [...updatedMessages, reply];
-      setMessages(finalMessages);
-      saveMessages(finalMessages);
+    setLoading(true);
+    try {
+      const message = await chatService.sendMessage(conversationId, newMessage);
+      setMessages(prev => [...prev, message]);
+      setNewMessage('');
 
       toast({
-        title: "New reply",
-        description: `${recipientName} has replied`,
+        title: "Message sent",
+        description: `Message sent to ${recipientName}`,
       });
-    }, 2000);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      toast({
+        title: "Failed to send message",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -119,9 +90,9 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ isOpen, onClose, recipientEmail
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file || !user || !conversationId) return;
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
@@ -132,23 +103,34 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ isOpen, onClose, recipientEmail
       return;
     }
 
-    const message: ChatMessage = {
-      id: Date.now().toString(),
-      senderId: user.id,
-      senderName: user.username,
-      content: `📎 ${file.name}`,
-      timestamp: new Date().toISOString(),
-      type: 'file'
-    };
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const message = await chatService.sendMessage(
+        conversationId, 
+        `📎 ${file.name}`, 
+        'file', 
+        formData
+      );
+      
+      setMessages(prev => [...prev, message]);
 
-    const updatedMessages = [...messages, message];
-    setMessages(updatedMessages);
-    saveMessages(updatedMessages);
-
-    toast({
-      title: "File sent",
-      description: `${file.name} has been sent`,
-    });
+      toast({
+        title: "File sent",
+        description: `${file.name} has been sent`,
+      });
+    } catch (error) {
+      console.error('Failed to send file:', error);
+      toast({
+        title: "Failed to send file",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -165,19 +147,30 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ isOpen, onClose, recipientEmail
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div key={message.id} className={`flex ${message.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
-              <Card className={`max-w-xs p-3 ${message.senderId === user?.id ? 'bg-bgl-blue-600 text-white' : 'bg-gray-100'}`}>
-                <div className="text-sm">
-                  <p className="font-semibold">{message.senderName}</p>
-                  <p>{message.content}</p>
-                  <p className="text-xs opacity-70 mt-1">
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </p>
-                </div>
-              </Card>
+          {loading && messages.length === 0 ? (
+            <div className="text-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bgl-blue-600 mx-auto"></div>
+              <p className="text-sm text-gray-500 mt-2">Loading conversation...</p>
             </div>
-          ))}
+          ) : messages.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No messages yet. Start the conversation!</p>
+            </div>
+          ) : (
+            messages.map((message) => (
+              <div key={message.id} className={`flex ${message.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
+                <Card className={`max-w-xs p-3 ${message.senderId === user?.id ? 'bg-bgl-blue-600 text-white' : 'bg-gray-100'}`}>
+                  <div className="text-sm">
+                    <p className="font-semibold">{message.senderName}</p>
+                    <p>{message.content}</p>
+                    <p className="text-xs opacity-70 mt-1">
+                      {new Date(message.timestamp).toLocaleTimeString()}
+                    </p>
+                  </div>
+                </Card>
+              </div>
+            ))
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -188,6 +181,7 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ isOpen, onClose, recipientEmail
               variant="ghost"
               size="icon"
               onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
             >
               <Paperclip className="h-4 w-4" />
             </Button>
@@ -197,8 +191,12 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ isOpen, onClose, recipientEmail
               onKeyPress={handleKeyPress}
               placeholder="Type your message..."
               className="flex-1"
+              disabled={loading}
             />
-            <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
+            <Button 
+              onClick={handleSendMessage} 
+              disabled={!newMessage.trim() || loading}
+            >
               <Send className="h-4 w-4" />
             </Button>
             <input

@@ -32,8 +32,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const cartItems = await cartService.getCart();
           setItems(cartItems);
         } catch (error) {
+          console.error('Failed to load cart:', error);
           // Fallback to localStorage if API fails
-          const storedCart = localStorage.getItem(`bgl_cart_${user.id}`);
+          const cartKey = `bgl_cart_${user.id}`;
+          const storedCart = localStorage.getItem(cartKey);
           if (storedCart) {
             setItems(JSON.parse(storedCart));
           }
@@ -54,7 +56,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const cartKey = user ? `bgl_cart_${user.id}` : 'bgl_cart_guest';
       localStorage.setItem(cartKey, JSON.stringify(items));
       
-      if (user) {
+      if (user && items.length > 0) {
         try {
           await cartService.updateCart(items);
         } catch (error) {
@@ -119,10 +121,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  const clearCart = () => {
+  const clearCart = async () => {
     setItems([]);
-    const cartKey = user ? `bgl_cart_${user.id}` : 'bgl_cart_guest';
-    localStorage.removeItem(cartKey);
+    try {
+      await cartService.clearCart();
+    } catch (error) {
+      console.error('Failed to clear cart on backend:', error);
+    }
   };
 
   const submitOrder = async () => {
@@ -148,22 +153,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const result = await ordersService.createOrder(orderData);
       
       if (result.success) {
+        await clearCart();
         toast({
           title: "Order submitted successfully!",
           description: `Order #${result.order_id} has been sent to admin for processing.`
         });
-        clearCart();
       } else {
         throw new Error('Order submission failed');
       }
     } catch (error) {
       console.error('Failed to submit order:', error);
       toast({
-        title: "Order submitted successfully!",
-        description: "Your order has been received and will be processed shortly.",
+        title: "Failed to submit order",
+        description: "Please try again. If the problem persists, contact support.",
+        variant: "destructive"
       });
-      // Clear cart even if backend fails since we have local storage
-      clearCart();
     } finally {
       setIsLoading(false);
     }

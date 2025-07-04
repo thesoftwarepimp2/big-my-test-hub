@@ -9,12 +9,13 @@ import { ShoppingCart, Users, MessageCircle, FileText, CheckCircle, Clock, Dolla
 import AdminProductManager from '@/components/AdminProductManager';
 import ChatDialog from '@/components/ChatDialog';
 import { ordersService } from '@/services/orders';
+import { chatService } from '@/services/chat';
 import { useQuery } from '@tanstack/react-query';
 
 const AdminPanel: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [chatOpen, setChatOpen] = useState(false);
-  const [selectedChatUser, setSelectedChatUser] = useState<{ email: string; name: string } | null>(null);
+  const [selectedChatUser, setSelectedChatUser] = useState<{ id: string; name: string } | null>(null);
 
   // Fetch real orders
   const { data: orders = [], refetch: refetchOrders } = useQuery({
@@ -23,37 +24,63 @@ const AdminPanel: React.FC = () => {
     refetchInterval: 5000, // Refresh every 5 seconds
   });
 
-  // Get registered users from localStorage (demo users who have logged in)
+  // Fetch conversations for chat
+  const { data: conversations = [] } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: chatService.getConversations,
+    refetchInterval: 10000, // Refresh every 10 seconds
+  });
+
+  // Get registered users from localStorage and conversations
   const getRegisteredUsers = () => {
-    const users = [];
     const storedUsers = localStorage.getItem('bgl_registered_users');
-    if (storedUsers) {
-      return JSON.parse(storedUsers);
+    let users = storedUsers ? JSON.parse(storedUsers) : [];
+    
+    // Add users from conversations
+    conversations.forEach(conv => {
+      conv.participants.forEach(participantId => {
+        if (participantId !== 'admin' && !users.find((u: any) => u.id === participantId)) {
+          users.push({
+            id: participantId,
+            businessName: conv.participantNames[participantId] || `User ${participantId}`,
+            email: `${participantId}@example.com`,
+            role: 'user',
+            status: 'active',
+            joinDate: new Date().toISOString().split('T')[0],
+            totalOrders: orders.filter(o => o.clientEmail === `${participantId}@example.com`).length,
+            totalSpent: orders.filter(o => o.clientEmail === `${participantId}@example.com`).reduce((sum, o) => sum + o.total, 0)
+          });
+        }
+      });
+    });
+    
+    // Add demo users if no real users exist
+    if (users.length === 0) {
+      users = [
+        {
+          id: 'demo-wholesaler',
+          businessName: 'Metro Wholesale Distributors',
+          email: 'demo@metrowholesale.com',
+          role: 'wholesaler',
+          status: 'active',
+          joinDate: '2024-01-10',
+          totalOrders: orders.filter(o => o.clientEmail === 'demo@metrowholesale.com').length,
+          totalSpent: orders.filter(o => o.clientEmail === 'demo@metrowholesale.com').reduce((sum, o) => sum + o.total, 0)
+        },
+        {
+          id: 'demo-retailer',
+          businessName: 'Corner Store Plus',
+          email: 'demo@cornerstoreplus.com',
+          role: 'retailer',
+          status: 'active',
+          joinDate: '2024-01-05',
+          totalOrders: orders.filter(o => o.clientEmail === 'demo@cornerstoreplus.com').length,
+          totalSpent: orders.filter(o => o.clientEmail === 'demo@cornerstoreplus.com').reduce((sum, o) => sum + o.total, 0)
+        }
+      ];
     }
     
-    // Demo registered users
-    return [
-      {
-        id: '1',
-        businessName: 'Metro Wholesale Distributors',
-        email: 'demo@metrowholesale.com',
-        role: 'wholesaler',
-        status: 'active',
-        joinDate: '2024-01-10',
-        totalOrders: orders.filter(o => o.clientEmail === 'demo@metrowholesale.com').length,
-        totalSpent: orders.filter(o => o.clientEmail === 'demo@metrowholesale.com').reduce((sum, o) => sum + o.total, 0)
-      },
-      {
-        id: '2',
-        businessName: 'Corner Store Plus',
-        email: 'demo@cornerstoreplus.com',
-        role: 'retailer',
-        status: 'active',
-        joinDate: '2024-01-05',
-        totalOrders: orders.filter(o => o.clientEmail === 'demo@cornerstoreplus.com').length,
-        totalSpent: orders.filter(o => o.clientEmail === 'demo@cornerstoreplus.com').reduce((sum, o) => sum + o.total, 0)
-      }
-    ];
+    return users;
   };
 
   const registeredUsers = getRegisteredUsers();
@@ -91,8 +118,8 @@ const AdminPanel: React.FC = () => {
     // Implementation for sending bill
   };
 
-  const handleStartChat = (userEmail: string, userName: string) => {
-    setSelectedChatUser({ email: userEmail, name: userName });
+  const handleStartChat = (userId: string, userName: string) => {
+    setSelectedChatUser({ id: userId, name: userName });
     setChatOpen(true);
   };
 
@@ -165,15 +192,17 @@ const AdminPanel: React.FC = () => {
       <Tabs defaultValue="orders" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1 rounded-lg h-auto">
           <TabsTrigger value="orders" className="bg-blue-500 text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white py-3 px-4 text-sm font-medium transition-all rounded-sm">
-            Orders
+            Orders ({orders.length})
           </TabsTrigger>
           <TabsTrigger value="products" className="bg-orange-500 text-white data-[state=active]:bg-orange-600 data-[state=active]:text-white py-3 px-4 text-sm font-medium transition-all rounded-sm">
             Products
           </TabsTrigger>
           <TabsTrigger value="users" className="bg-green-500 text-white data-[state=active]:bg-green-600 data-[state=active]:text-white py-3 px-4 text-sm font-medium transition-all rounded-sm">
-            Users
+            Users ({registeredUsers.length})
           </TabsTrigger>
-          <TabsTrigger value="communications" className="bg-purple-500 text-white data-[state=active]:bg-purple-600 data-[state=active]:text-white py-3 px-4 text-sm font-medium transition-all rounded-sm">Chat</TabsTrigger>
+          <TabsTrigger value="communications" className="bg-purple-500 text-white data-[state=active]:bg-purple-600 data-[state=active]:text-white py-3 px-4 text-sm font-medium transition-all rounded-sm">
+            Chat ({conversations.length})
+          </TabsTrigger>
         </TabsList>
 
         {/* Orders Management Tab */}
@@ -192,6 +221,7 @@ const AdminPanel: React.FC = () => {
                   <div className="text-center py-8">
                     <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                     <p className="text-gray-500">No orders yet. Orders will appear here when customers submit them.</p>
+                    <p className="text-sm text-gray-400 mt-2">Try submitting an order from the wholesaler/retailer view to test the system.</p>
                   </div>
                 ) : (
                   orders.map(order => (
@@ -291,7 +321,7 @@ const AdminPanel: React.FC = () => {
                           <Button 
                             size="sm" 
                             variant="outline" 
-                            onClick={() => handleStartChat(user.email, user.businessName)}
+                            onClick={() => handleStartChat(user.id, user.businessName)}
                           >
                             <MessageCircle className="h-4 w-4 mr-1" />
                             Chat
@@ -310,35 +340,56 @@ const AdminPanel: React.FC = () => {
         <TabsContent value="communications" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Start New Conversation</CardTitle>
+              <CardTitle>Active Conversations</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
               <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-4">
-                  {registeredUsers.filter(u => u.status === 'active').map(user => (
-                    <Card key={user.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                {conversations.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageCircle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-500">No conversations yet.</p>
+                    <p className="text-sm text-gray-400 mt-2">Start chatting with users from the Users tab or wait for them to message you.</p>
+                  </div>
+                ) : (
+                  conversations.map(conversation => (
+                    <Card key={conversation.id} className="hover:shadow-md transition-shadow">
                       <CardContent className="p-4">
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
                           <div className="flex-1">
-                            <h4 className="font-medium break-words">{user.businessName}</h4>
-                            <p className="text-sm text-gray-500 break-all">{user.email}</p>
-                            <Badge className="mt-1" variant="outline">
-                              {user.role}
-                            </Badge>
+                            <h4 className="font-medium">
+                              {Object.values(conversation.participantNames).filter(name => name !== 'Admin').join(', ')}
+                            </h4>
+                            {conversation.lastMessage && (
+                              <p className="text-sm text-gray-500 truncate">
+                                Last: {conversation.lastMessage.content}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-400">
+                              {conversation.updatedAt ? new Date(conversation.updatedAt).toLocaleString() : ''}
+                            </p>
                           </div>
-                          <Button 
-                            size="sm" 
-                            onClick={() => handleStartChat(user.email, user.businessName)} 
-                            className="bg-bgl-blue-600 hover:bg-bgl-blue-700 text-white w-full sm:w-auto"
-                          >
-                            <Send className="h-4 w-4 mr-1" />
-                            Start Chat
-                          </Button>
+                          <div className="flex items-center space-x-2">
+                            {conversation.unreadCount > 0 && (
+                              <Badge variant="destructive">{conversation.unreadCount}</Badge>
+                            )}
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                const userId = conversation.participants.find(p => p !== 'admin') || '';
+                                const userName = conversation.participantNames[userId] || 'User';
+                                handleStartChat(userId, userName);
+                              }}
+                              className="bg-bgl-blue-600 hover:bg-bgl-blue-700 text-white"
+                            >
+                              <Send className="h-4 w-4 mr-1" />
+                              Open Chat
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -349,7 +400,7 @@ const AdminPanel: React.FC = () => {
       <ChatDialog
         isOpen={chatOpen}
         onClose={() => setChatOpen(false)}
-        recipientEmail={selectedChatUser?.email || ''}
+        recipientId={selectedChatUser?.id || ''}
         recipientName={selectedChatUser?.name || ''}
       />
     </div>
