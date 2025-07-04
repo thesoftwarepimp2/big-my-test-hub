@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
+  updateUser: (updatedUser: User) => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -41,6 +42,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateUser = async (updatedUser: User) => {
+    try {
+      // Update user in localStorage
+      localStorage.setItem('bgl_user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+    } catch (error) {
+      console.error('Update user failed:', error);
+      throw error;
+    }
+  };
+
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -51,6 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user, 
       login, 
       logout, 
+      updateUser,
       isAuthenticated: !!user,
       isLoading 
     }}>
