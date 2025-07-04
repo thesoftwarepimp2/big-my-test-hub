@@ -8,7 +8,8 @@ export const demoUsers: User[] = [
     role: 'wholesaler',
     businessName: 'Metro Wholesale Distributors',
     email: 'demo@metrowholesale.com',
-    phone: '+263 123 456 789'
+    phone: '+263 123 456 789',
+    address: '123 Business St, Harare, Zimbabwe'
   },
   {
     id: '2',
@@ -16,7 +17,8 @@ export const demoUsers: User[] = [
     role: 'retailer',
     businessName: 'Corner Store Plus',
     email: 'demo@cornerstoreplus.com',
-    phone: '+263 987 654 321'
+    phone: '+263 987 654 321',
+    address: '456 Retail Ave, Bulawayo, Zimbabwe'
   },
   {
     id: '3',
@@ -24,7 +26,8 @@ export const demoUsers: User[] = [
     role: 'admin',
     businessName: 'Big Game Logistics',
     email: 'admin@biggamelogistics.com',
-    phone: '+263 555 000 111'
+    phone: '+263 555 000 111',
+    address: '789 Admin Blvd, Harare, Zimbabwe'
   }
 ];
 

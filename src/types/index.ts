@@ -32,6 +32,7 @@ export interface User {
   businessName?: string;
   email?: string;
   phone?: string;
+  address?: string;
 }
 
 export interface Order {
