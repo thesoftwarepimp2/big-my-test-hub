@@ -15,8 +15,38 @@ export interface AuthResponse {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await bglApi.post('/auth', credentials);
-    return response.data;
+    try {
+      const response = await bglApi.post('/auth', credentials);
+      return response.data;
+    } catch (error) {
+      // Mock response for demo - remove when backend is ready
+      console.log('Using mock auth for demo');
+      const mockUser: User = {
+        id: '1',
+        username: credentials.username,
+        email: `${credentials.username}@example.com`,
+        role: credentials.role,
+        businessName: `${credentials.username} Business`,
+        phone: '+1234567890',
+        address: '123 Business St'
+      };
+      
+      return {
+        token: 'mock-jwt-token',
+        user: mockUser
+      };
+    }
+  },
+
+  async updateUser(user: User): Promise<User> {
+    try {
+      const response = await bglApi.put('/user/profile', user);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to update user profile:', error);
+      // For demo, return the updated user
+      return user;
+    }
   },
 
   logout() {

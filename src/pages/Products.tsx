@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
-import { useWordPressProducts } from '@/hooks/useWordPress';
+import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,11 +13,11 @@ import { toast } from '@/hooks/use-toast';
 
 const Products: React.FC = () => {
   const { items, updateQuantity, removeItem, totalItems, totalAmount, submitOrder, isLoading: cartLoading } = useCart();
-  const { data: products = [], isLoading, error } = useWordPressProducts();
+  const { data: products = [], isLoading, error } = useProducts();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Products');
 
-  // Get unique categories from WordPress products
+  // Get unique categories from products
   const categories = ['All Products', ...Array.from(new Set(products.map(p => p.category)))];
 
   const filteredProducts = products.filter(product => {
@@ -34,7 +34,7 @@ const Products: React.FC = () => {
         <div className="flex justify-center items-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bgl-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading products from WordPress...</p>
+            <p className="text-gray-600">Loading products...</p>
           </div>
         </div>
       </div>
@@ -50,7 +50,7 @@ const Products: React.FC = () => {
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to load products</h3>
           <p className="text-gray-600">
-            Could not connect to WordPress backend. Please check your connection.
+            Could not connect to backend. Using demo products.
           </p>
         </div>
       </div>
@@ -197,7 +197,7 @@ const Products: React.FC = () => {
       {/* Results Summary */}
       <div className="flex justify-between items-center">
         <p className="text-sm text-gray-600">
-          Showing {filteredProducts.length} of {products.length} products from WordPress
+          Showing {filteredProducts.length} of {products.length} products
           {selectedCategory !== 'All Products' && ` in "${selectedCategory}"`}
         </p>
       </div>

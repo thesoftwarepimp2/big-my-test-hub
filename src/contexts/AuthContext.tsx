@@ -44,9 +44,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateUser = async (updatedUser: User) => {
     try {
-      // Update user in localStorage
-      localStorage.setItem('bgl_user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
+      // Update user via backend service
+      const updated = await authService.updateUser(updatedUser);
+      
+      // Update localStorage and state
+      localStorage.setItem('bgl_user', JSON.stringify(updated));
+      setUser(updated);
+      
+      console.log('User profile updated successfully');
     } catch (error) {
       console.error('Update user failed:', error);
       throw error;

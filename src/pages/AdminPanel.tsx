@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, Users, MessageCircle, FileText, CheckCircle, Clock, DollarSign, Search, Eye, Send } from 'lucide-react';
+import { ShoppingCart, Users, MessageCircle, FileText, CheckCircle, Clock, DollarSign, Search, Eye, Send, Package } from 'lucide-react';
+import AdminProductManager from '@/components/AdminProductManager';
+
 const AdminPanel: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -87,6 +89,7 @@ const AdminPanel: React.FC = () => {
     totalOrders: 3,
     totalSpent: 675.50
   }];
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -105,23 +108,28 @@ const AdminPanel: React.FC = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
   const handleProcessOrder = (orderId: string) => {
     console.log('Processing order:', orderId);
     // Implementation for processing order
   };
+
   const handleSendBill = (orderId: string) => {
     console.log('Sending bill for order:', orderId);
     // Implementation for sending bill
   };
+
   const handleStartChat = (userEmail: string) => {
     console.log('Starting chat with:', userEmail);
     // Implementation for starting chat
   };
-  return <div className="space-y-6 pb-20 md:pb-6">
+
+  return (
+    <div className="space-y-6 pb-20 md:pb-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
-          <p className="text-gray-600">Manage orders, users, and communications</p>
+          <p className="text-gray-600">Manage orders, users, products, and communications</p>
         </div>
       </div>
 
@@ -183,9 +191,12 @@ const AdminPanel: React.FC = () => {
       </div>
 
       <Tabs defaultValue="orders" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg h-auto">
+        <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1 rounded-lg h-auto">
           <TabsTrigger value="orders" className="bg-blue-500 text-white data-[state=active]:bg-blue-600 data-[state=active]:text-white py-3 px-4 text-sm font-medium transition-all rounded-sm">
             Orders
+          </TabsTrigger>
+          <TabsTrigger value="products" className="bg-orange-500 text-white data-[state=active]:bg-orange-600 data-[state=active]:text-white py-3 px-4 text-sm font-medium transition-all rounded-sm">
+            Products
           </TabsTrigger>
           <TabsTrigger value="users" className="bg-green-500 text-white data-[state=active]:bg-green-600 data-[state=active]:text-white py-3 px-4 text-sm font-medium transition-all rounded-sm">
             Users
@@ -205,7 +216,8 @@ const AdminPanel: React.FC = () => {
             </CardHeader>
             <CardContent className="p-4">
               <div className="space-y-4">
-                {orders.map(order => <Card key={order.id} className="border-l-4 border-l-bgl-blue-600">
+                {orders.map(order => (
+                  <Card key={order.id} className="border-l-4 border-l-bgl-blue-600">
                     <CardContent className="p-4">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
                         <div className="flex-1">
@@ -222,10 +234,12 @@ const AdminPanel: React.FC = () => {
                       <div className="mb-3">
                         <h4 className="text-sm font-medium mb-2">Items:</h4>
                         <div className="space-y-1">
-                          {order.items.map((item, index) => <div key={index} className="text-sm text-gray-600 flex flex-col sm:flex-row sm:justify-between">
+                          {order.items.map((item, index) => (
+                            <div key={index} className="text-sm text-gray-600 flex flex-col sm:flex-row sm:justify-between">
                               <span className="break-words">{item.name} x{item.quantity}</span>
                               <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
-                            </div>)}
+                            </div>
+                          ))}
                         </div>
                       </div>
 
@@ -250,8 +264,18 @@ const AdminPanel: React.FC = () => {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>)}
+                  </Card>
+                ))}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Product Management Tab */}
+        <TabsContent value="products" className="space-y-4">
+          <Card>
+            <CardContent className="p-6">
+              <AdminProductManager />
             </CardContent>
           </Card>
         </TabsContent>
@@ -264,7 +288,8 @@ const AdminPanel: React.FC = () => {
             </CardHeader>
             <CardContent className="p-4">
               <div className="space-y-4">
-                {registeredUsers.map(user => <Card key={user.id} className="border-l-4 border-l-green-500">
+                {registeredUsers.map(user => (
+                  <Card key={user.id} className="border-l-4 border-l-green-500">
                     <CardContent className="p-4">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-3 sm:space-y-0">
                         <div className="flex-1">
@@ -291,7 +316,8 @@ const AdminPanel: React.FC = () => {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>)}
+                  </Card>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -306,7 +332,8 @@ const AdminPanel: React.FC = () => {
             <CardContent className="p-4">
               <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-4">
-                  {registeredUsers.filter(u => u.status === 'active').map(user => <Card key={user.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                  {registeredUsers.filter(u => u.status === 'active').map(user => (
+                    <Card key={user.id} className="hover:shadow-md transition-shadow cursor-pointer">
                       <CardContent className="p-4">
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
                           <div className="flex-1">
@@ -322,13 +349,16 @@ const AdminPanel: React.FC = () => {
                           </Button>
                         </div>
                       </CardContent>
-                    </Card>)}
+                    </Card>
+                  ))}
                 </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 };
+
 export default AdminPanel;
