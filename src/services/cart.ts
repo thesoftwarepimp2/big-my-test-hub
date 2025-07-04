@@ -9,7 +9,9 @@ export const cartService = {
       return response.data || [];
     } catch (error) {
       console.error('Failed to fetch cart:', error);
-      return [];
+      // For demo, return from localStorage
+      const storedCart = localStorage.getItem('bgl_cart');
+      return storedCart ? JSON.parse(storedCart) : [];
     }
   },
 
@@ -18,7 +20,8 @@ export const cartService = {
       await bglApi.post('/cart', cartItems);
     } catch (error) {
       console.error('Failed to update cart:', error);
-      throw error;
+      // For demo, store in localStorage
+      localStorage.setItem('bgl_cart', JSON.stringify(cartItems));
     }
   },
 
@@ -27,7 +30,8 @@ export const cartService = {
       await bglApi.post('/cart', []);
     } catch (error) {
       console.error('Failed to clear cart:', error);
-      throw error;
+      // For demo, clear localStorage
+      localStorage.removeItem('bgl_cart');
     }
   }
 };

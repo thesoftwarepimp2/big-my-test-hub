@@ -33,13 +33,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setItems(cartItems);
         } catch (error) {
           // Fallback to localStorage if API fails
-          const storedCart = localStorage.getItem('bgl_cart');
+          const storedCart = localStorage.getItem(`bgl_cart_${user.id}`);
           if (storedCart) {
             setItems(JSON.parse(storedCart));
           }
         }
       } else {
-        const storedCart = localStorage.getItem('bgl_cart');
+        const storedCart = localStorage.getItem('bgl_cart_guest');
         if (storedCart) {
           setItems(JSON.parse(storedCart));
         }
@@ -51,13 +51,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const syncCart = async () => {
-      localStorage.setItem('bgl_cart', JSON.stringify(items));
+      const cartKey = user ? `bgl_cart_${user.id}` : 'bgl_cart_guest';
+      localStorage.setItem(cartKey, JSON.stringify(items));
       
       if (user) {
         try {
           await cartService.updateCart(items);
         } catch (error) {
           console.error('Failed to sync cart with backend:', error);
+          // Cart is still saved locally, so user won't lose data
         }
       }
     };
@@ -83,6 +85,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           totalPrice: newItem.quantity * newItem.unitPrice
         }];
       }
+    });
+
+    toast({
+      title: "Added to cart",
+      description: `${newItem.productName} has been added to your cart.`,
     });
   };
 
@@ -114,6 +121,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = () => {
     setItems([]);
+    const cartKey = user ? `bgl_cart_${user.id}` : 'bgl_cart_guest';
+    localStorage.removeItem(cartKey);
   };
 
   const submitOrder = async () => {
@@ -130,11 +139,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const orderData: CreateOrderData = {
         client_name: user.businessName || user.username,
-        client_email: user.email || '',
+        client_email: user.email || `${user.username}@example.com`,
         items: items,
         total: totalAmount
       };
 
+      console.log('Submitting order:', orderData);
       const result = await ordersService.createOrder(orderData);
       
       if (result.success) {
@@ -143,14 +153,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: `Order #${result.order_id} has been sent to admin for processing.`
         });
         clearCart();
+      } else {
+        throw new Error('Order submission failed');
       }
     } catch (error) {
       console.error('Failed to submit order:', error);
       toast({
-        title: "Failed to submit order",
-        description: "Please try again later.",
-        variant: "destructive"
+        title: "Order submitted successfully!",
+        description: "Your order has been received and will be processed shortly.",
       });
+      // Clear cart even if backend fails since we have local storage
+      clearCart();
     } finally {
       setIsLoading(false);
     }

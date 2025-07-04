@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,89 +7,56 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, Users, MessageCircle, FileText, CheckCircle, Clock, DollarSign, Search, Eye, Send, Package } from 'lucide-react';
 import AdminProductManager from '@/components/AdminProductManager';
+import ChatDialog from '@/components/ChatDialog';
+import { ordersService } from '@/services/orders';
+import { useQuery } from '@tanstack/react-query';
 
 const AdminPanel: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [chatOpen, setChatOpen] = useState(false);
+  const [selectedChatUser, setSelectedChatUser] = useState<{ email: string; name: string } | null>(null);
 
-  // Mock data for orders
-  const orders = [{
-    id: 'ORD-001',
-    clientName: 'ABC Retailers',
-    clientEmail: 'orders@abcretailers.com',
-    items: [{
-      name: 'MEGA ROLLER FLOUR 10KG',
-      quantity: 5,
-      price: 18.50
-    }, {
-      name: 'BUTTERCUP MARGARINE',
-      quantity: 10,
-      price: 6.50
-    }],
-    total: 157.50,
-    status: 'pending',
-    date: '2024-01-15',
-    paymentStatus: 'unpaid'
-  }, {
-    id: 'ORD-002',
-    clientName: 'XYZ Wholesale',
-    clientEmail: 'admin@xyzwholesale.com',
-    items: [{
-      name: 'POTATOES 10KG',
-      quantity: 20,
-      price: 6.75
-    }, {
-      name: 'KOO BAKED BEANS 410G',
-      quantity: 50,
-      price: 2.85
-    }],
-    total: 277.50,
-    status: 'processing',
-    date: '2024-01-14',
-    paymentStatus: 'paid'
-  }, {
-    id: 'ORD-003',
-    clientName: 'Quick Mart Ltd',
-    clientEmail: 'procurement@quickmart.com',
-    items: [{
-      name: 'CHIMOMBE FULL CREAM MILK 1L',
-      quantity: 100,
-      price: 4.25
-    }],
-    total: 425.00,
-    status: 'delivered',
-    date: '2024-01-13',
-    paymentStatus: 'paid'
-  }];
+  // Fetch real orders
+  const { data: orders = [], refetch: refetchOrders } = useQuery({
+    queryKey: ['orders'],
+    queryFn: ordersService.getOrders,
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
 
-  // Mock data for registered users
-  const registeredUsers = [{
-    id: '1',
-    businessName: 'ABC Retailers',
-    email: 'orders@abcretailers.com',
-    role: 'retailer',
-    status: 'active',
-    joinDate: '2024-01-10',
-    totalOrders: 15,
-    totalSpent: 2500.75
-  }, {
-    id: '2',
-    businessName: 'XYZ Wholesale',
-    email: 'admin@xyzwholesale.com',
-    role: 'wholesaler',
-    status: 'active',
-    joinDate: '2024-01-05',
-    totalOrders: 28,
-    totalSpent: 8750.25
-  }, {
-    id: '3',
-    businessName: 'Quick Mart Ltd',
-    email: 'procurement@quickmart.com',
-    role: 'retailer',
-    status: 'pending',
-    joinDate: '2024-01-12',
-    totalOrders: 3,
-    totalSpent: 675.50
-  }];
+  // Get registered users from localStorage (demo users who have logged in)
+  const getRegisteredUsers = () => {
+    const users = [];
+    const storedUsers = localStorage.getItem('bgl_registered_users');
+    if (storedUsers) {
+      return JSON.parse(storedUsers);
+    }
+    
+    // Demo registered users
+    return [
+      {
+        id: '1',
+        businessName: 'Metro Wholesale Distributors',
+        email: 'demo@metrowholesale.com',
+        role: 'wholesaler',
+        status: 'active',
+        joinDate: '2024-01-10',
+        totalOrders: orders.filter(o => o.clientEmail === 'demo@metrowholesale.com').length,
+        totalSpent: orders.filter(o => o.clientEmail === 'demo@metrowholesale.com').reduce((sum, o) => sum + o.total, 0)
+      },
+      {
+        id: '2',
+        businessName: 'Corner Store Plus',
+        email: 'demo@cornerstoreplus.com',
+        role: 'retailer',
+        status: 'active',
+        joinDate: '2024-01-05',
+        totalOrders: orders.filter(o => o.clientEmail === 'demo@cornerstoreplus.com').length,
+        totalSpent: orders.filter(o => o.clientEmail === 'demo@cornerstoreplus.com').reduce((sum, o) => sum + o.total, 0)
+      }
+    ];
+  };
+
+  const registeredUsers = getRegisteredUsers();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -109,9 +77,13 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleProcessOrder = (orderId: string) => {
-    console.log('Processing order:', orderId);
-    // Implementation for processing order
+  const handleProcessOrder = async (orderId: string) => {
+    try {
+      await ordersService.updateOrderStatus(orderId, 'processing');
+      refetchOrders();
+    } catch (error) {
+      console.error('Error processing order:', error);
+    }
   };
 
   const handleSendBill = (orderId: string) => {
@@ -119,9 +91,9 @@ const AdminPanel: React.FC = () => {
     // Implementation for sending bill
   };
 
-  const handleStartChat = (userEmail: string) => {
-    console.log('Starting chat with:', userEmail);
-    // Implementation for starting chat
+  const handleStartChat = (userEmail: string, userName: string) => {
+    setSelectedChatUser({ email: userEmail, name: userName });
+    setChatOpen(true);
   };
 
   return (
@@ -216,56 +188,63 @@ const AdminPanel: React.FC = () => {
             </CardHeader>
             <CardContent className="p-4">
               <div className="space-y-4">
-                {orders.map(order => (
-                  <Card key={order.id} className="border-l-4 border-l-bgl-blue-600">
-                    <CardContent className="p-4">
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{order.id}</h3>
-                          <p className="text-sm text-gray-600">{order.clientName}</p>
-                          <p className="text-xs text-gray-500 break-all">{order.clientEmail}</p>
+                {orders.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-500">No orders yet. Orders will appear here when customers submit them.</p>
+                  </div>
+                ) : (
+                  orders.map(order => (
+                    <Card key={order.id} className="border-l-4 border-l-bgl-blue-600">
+                      <CardContent className="p-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">{order.id}</h3>
+                            <p className="text-sm text-gray-600">{order.clientName}</p>
+                            <p className="text-xs text-gray-500 break-all">{order.clientEmail}</p>
+                          </div>
+                          <div className="text-left sm:text-right">
+                            <p className="text-lg font-bold text-bgl-blue-700">${order.total.toFixed(2)}</p>
+                            <p className="text-xs text-gray-500">{order.date}</p>
+                          </div>
                         </div>
-                        <div className="text-left sm:text-right">
-                          <p className="text-lg font-bold text-bgl-blue-700">${order.total.toFixed(2)}</p>
-                          <p className="text-xs text-gray-500">{order.date}</p>
-                        </div>
-                      </div>
 
-                      <div className="mb-3">
-                        <h4 className="text-sm font-medium mb-2">Items:</h4>
-                        <div className="space-y-1">
-                          {order.items.map((item, index) => (
-                            <div key={index} className="text-sm text-gray-600 flex flex-col sm:flex-row sm:justify-between">
-                              <span className="break-words">{item.name} x{item.quantity}</span>
-                              <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
-                            </div>
-                          ))}
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium mb-2">Items:</h4>
+                          <div className="space-y-1">
+                            {order.items.map((item, index) => (
+                              <div key={index} className="text-sm text-gray-600 flex flex-col sm:flex-row sm:justify-between">
+                                <span className="break-words">{item.name} x{item.quantity}</span>
+                                <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
-                        <div className="flex flex-wrap gap-2">
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status.toUpperCase()}
-                          </Badge>
-                          <Badge className={getStatusColor(order.paymentStatus)}>
-                            {order.paymentStatus.toUpperCase()}
-                          </Badge>
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+                          <div className="flex flex-wrap gap-2">
+                            <Badge className={getStatusColor(order.status)}>
+                              {order.status.toUpperCase()}
+                            </Badge>
+                            <Badge className={getStatusColor(order.paymentStatus)}>
+                              {order.paymentStatus.toUpperCase()}
+                            </Badge>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <Button size="sm" variant="outline" onClick={() => handleProcessOrder(order.id)}>
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Process
+                            </Button>
+                            <Button size="sm" className="bg-bgl-yellow-400 hover:bg-bgl-yellow-500 text-gray-900" onClick={() => handleSendBill(order.id)}>
+                              <FileText className="h-4 w-4 mr-1" />
+                              Send Bill
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          <Button size="sm" variant="outline" onClick={() => handleProcessOrder(order.id)}>
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Process
-                          </Button>
-                          <Button size="sm" className="bg-bgl-yellow-400 hover:bg-bgl-yellow-500 text-gray-900" onClick={() => handleSendBill(order.id)}>
-                            <FileText className="h-4 w-4 mr-1" />
-                            Send Bill
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -309,7 +288,11 @@ const AdminPanel: React.FC = () => {
                           <Badge className={getStatusColor(user.status)}>
                             {user.status.toUpperCase()}
                           </Badge>
-                          <Button size="sm" variant="outline" onClick={() => handleStartChat(user.email)}>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => handleStartChat(user.email, user.businessName)}
+                          >
                             <MessageCircle className="h-4 w-4 mr-1" />
                             Chat
                           </Button>
@@ -343,7 +326,11 @@ const AdminPanel: React.FC = () => {
                               {user.role}
                             </Badge>
                           </div>
-                          <Button size="sm" onClick={() => handleStartChat(user.email)} className="bg-bgl-blue-600 hover:bg-bgl-blue-700 text-white w-full sm:w-auto">
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleStartChat(user.email, user.businessName)} 
+                            className="bg-bgl-blue-600 hover:bg-bgl-blue-700 text-white w-full sm:w-auto"
+                          >
                             <Send className="h-4 w-4 mr-1" />
                             Start Chat
                           </Button>
@@ -357,6 +344,14 @@ const AdminPanel: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Chat Dialog */}
+      <ChatDialog
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+        recipientEmail={selectedChatUser?.email || ''}
+        recipientName={selectedChatUser?.name || ''}
+      />
     </div>
   );
 };
