@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -97,7 +96,7 @@ const Login: React.FC<LoginProps> = ({ onBack }) => {
                         ? 'bg-bgl-blue-600 text-white' 
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
-                    onClick={() => setDemoCredentials(role)}
+                    onClick={() => setSelectedRole(role)}
                   >
                     {role}
                   </Button>
@@ -202,13 +201,13 @@ const Login: React.FC<LoginProps> = ({ onBack }) => {
           </CardContent>
         </Card>
 
-        {/* Demo Credentials Info */}
+        {/* WordPress Integration Info */}
         <div className="mt-6 p-4 bg-white/10 rounded-lg text-white text-sm">
           <p className="font-semibold mb-2">WordPress Integration Active:</p>
           <div className="space-y-1 text-xs">
             <p>• Backend: school.nhaka.online/connect/</p>
-            <p>• API: WordPress REST API + Custom BGL endpoints</p>
-            <p>• Authentication: JWT tokens</p>
+            <p>• API: WordPress REST API + WooCommerce</p>
+            <p>• Authentication: Custom JWT tokens</p>
             <p>• Use your WordPress user credentials to login</p>
           </div>
         </div>

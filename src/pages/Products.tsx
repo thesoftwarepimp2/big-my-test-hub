@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
-import { products, categories } from '@/data/products';
+import { useWordPressProducts } from '@/hooks/useWordPress';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,8 +12,12 @@ import { toast } from '@/hooks/use-toast';
 
 const Products: React.FC = () => {
   const { items, updateQuantity, removeItem, totalItems, totalAmount, clearCart } = useCart();
+  const { data: products = [], isLoading, error } = useWordPressProducts();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Products');
+
+  // Get unique categories from WordPress products
+  const categories = ['All Products', ...Array.from(new Set(products.map(p => p.category)))];
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -41,6 +44,35 @@ const Products: React.FC = () => {
 
     clearCart();
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-6">
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bgl-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading products from WordPress...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-6">
+        <div className="text-center py-12">
+          <div className="text-red-400 mb-4">
+            <Package className="h-16 w-16 mx-auto" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to load products</h3>
+          <p className="text-gray-600">
+            Could not connect to WordPress backend. Please check your connection.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-20 md:pb-6">
@@ -181,7 +213,7 @@ const Products: React.FC = () => {
       {/* Results Summary */}
       <div className="flex justify-between items-center">
         <p className="text-sm text-gray-600">
-          Showing {filteredProducts.length} of {products.length} products
+          Showing {filteredProducts.length} of {products.length} products from WordPress
           {selectedCategory !== 'All Products' && ` in "${selectedCategory}"`}
         </p>
       </div>

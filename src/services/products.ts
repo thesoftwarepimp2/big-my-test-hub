@@ -2,53 +2,75 @@
 import { api } from './api';
 import { Product } from '@/types';
 
-export interface WordPressProduct {
+export interface WooCommerceProduct {
   id: number;
-  title: { rendered: string };
-  content: { rendered: string };
-  featured_media: number;
-  acf: {
-    product_category: string;
-    product_image: string;
-    product_description: string;
-    product_sizes: Array<{
-      size_name: string;
-      usd_price: number;
-      zig_price: number;
-    }>;
-    in_stock: boolean;
-  };
+  name: string;
+  description: string;
+  short_description: string;
+  images: Array<{
+    src: string;
+    alt: string;
+  }>;
+  categories: Array<{
+    id: number;
+    name: string;
+    slug: string;
+  }>;
+  attributes: Array<{
+    id: number;
+    name: string;
+    options: string[];
+  }>;
+  variations: number[];
+  price: string;
+  regular_price: string;
+  stock_status: 'instock' | 'outofstock';
+  meta_data: Array<{
+    key: string;
+    value: any;
+  }>;
 }
 
-const transformWordPressProduct = (wpProduct: WordPressProduct): Product => {
+const transformWooCommerceProduct = (wcProduct: WooCommerceProduct): Product => {
+  // Extract sizes from product variations or attributes
+  const sizeAttribute = wcProduct.attributes.find(attr => 
+    attr.name.toLowerCase().includes('size') || attr.name.toLowerCase().includes('weight')
+  );
+  
+  const sizes = sizeAttribute?.options.map(size => ({
+    size: size,
+    usdPrice: parseFloat(wcProduct.price) || 0,
+    zigPrice: parseFloat(wcProduct.price) * 500 // Convert USD to ZIG (example rate)
+  })) || [{
+    size: 'Standard',
+    usdPrice: parseFloat(wcProduct.price) || 0,
+    zigPrice: parseFloat(wcProduct.price) * 500
+  }];
+
   return {
-    id: wpProduct.id.toString(),
-    name: wpProduct.title.rendered,
-    category: wpProduct.acf.product_category,
-    image: wpProduct.acf.product_image,
-    description: wpProduct.acf.product_description,
-    sizes: wpProduct.acf.product_sizes.map(size => ({
-      size: size.size_name,
-      usdPrice: size.usd_price,
-      zigPrice: size.zig_price
-    })),
-    inStock: wpProduct.acf.in_stock
+    id: wcProduct.id.toString(),
+    name: wcProduct.name,
+    category: wcProduct.categories[0]?.name || 'General',
+    image: wcProduct.images[0]?.src || '',
+    description: wcProduct.short_description || wcProduct.description,
+    sizes: sizes,
+    inStock: wcProduct.stock_status === 'instock'
   };
 };
 
 export const productsService = {
   async getProducts(): Promise<Product[]> {
-    const response = await api.get('/wp/v2/products?_embed&per_page=100');
-    return response.data.map(transformWordPressProduct);
+    const response = await api.get('/wc/v3/products?per_page=100&consumer_key=your_key&consumer_secret=your_secret');
+    return response.data.map(transformWooCommerceProduct);
   },
 
   async getProduct(id: string): Promise<Product> {
-    const response = await api.get(`/wp/v2/products/${id}?_embed`);
-    return transformWordPressProduct(response.data);
+    const response = await api.get(`/wc/v3/products/${id}?consumer_key=your_key&consumer_secret=your_secret`);
+    return transformWooCommerceProduct(response.data);
   },
 
   async getProductsByCategory(category: string): Promise<Product[]> {
-    const response = await api.get(`/wp/v2/products?_embed&per_page=100&acf_product_category=${category}`);
-    return response.data.map(transformWordPressProduct);
+    const response = await api.get(`/wc/v3/products?category=${category}&per_page=100&consumer_key=your_key&consumer_secret=your_secret`);
+    return response.data.map(transformWooCommerceProduct);
   }
 };

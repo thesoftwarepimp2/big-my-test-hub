@@ -4,7 +4,7 @@ import axios from 'axios';
 const WORDPRESS_API_URL = import.meta.env.VITE_WORDPRESS_API_URL || 'https://school.nhaka.online/connect/wp-json';
 const BGL_API_URL = import.meta.env.VITE_BGL_API_URL || 'https://school.nhaka.online/connect/wp-json/bgl/v1';
 
-// Create axios instance with default config
+// Create axios instance for WooCommerce products
 const api = axios.create({
   baseURL: WORDPRESS_API_URL,
   headers: {
@@ -12,7 +12,7 @@ const api = axios.create({
   },
 });
 
-// Create BGL API instance
+// Create BGL API instance for custom endpoints
 const bglApi = axios.create({
   baseURL: BGL_API_URL,
   headers: {
